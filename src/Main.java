@@ -33,15 +33,12 @@ public class Main {
                 File fileToZip = new File(file);
                 FileInputStream fis = new FileInputStream(fileToZip);
                 zip.putNextEntry(new ZipEntry(fileToZip.getName()));
-                int length;
-
-                byte[] b = new byte[2048];
-
-                while((length = fis.read(b)) > 0) {
-                    zip.write(b, 0, length);
-                }
+                byte[] b = new byte[fis.available()];
+                fis.read(b);
+                zip.write(b);
                 fis.close();
-                zip.close();
+                zip.closeEntry();
+                fileToZip.delete();
             }
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
@@ -69,6 +66,7 @@ public class Main {
         GameProgress gameProgress = null;
         GameProgress gameProgress1 = null;
         GameProgress gameProgress2 = null;
+
         try (FileInputStream fil = new FileInputStream(s); ObjectInputStream ois = new ObjectInputStream(fil)){
             gameProgress = (GameProgress) ois.readObject();
             gameProgress1 = (GameProgress) ois.readObject();
@@ -76,15 +74,12 @@ public class Main {
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
+
         System.out.println(gameProgress);
         System.out.println(gameProgress1);
         System.out.println(gameProgress2);
     }
 
-    static void delete(String s){
-        File f = new File(s);
-        f.delete();
-    }
 
     public static void main(String[] args) {
         List<String> listSave = Arrays.asList("F:/Game/savegames/save1.dat", "F:/Game/savegames/save2.dat", "F:/Game/savegames/save3.dat");
@@ -92,7 +87,6 @@ public class Main {
         saveGame(listSave.get(1), new GameProgress(80, 3, 55, 600.30));
         saveGame(listSave.get(2), new GameProgress(50, 5, 65, 600.30));
         zipFiles("F:/Game/savegames/zip.zip", listSave);
-        delete("F:/Game/savegames/save.dat");
         zipFilesRevert("F:/Game/savegames/zip.zip");
         desirealize("F:/Game/savegames/newSave.dat");
 
